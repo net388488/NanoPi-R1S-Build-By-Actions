@@ -1,6 +1,6 @@
 #
 # This is free software, lisence use MIT.
-#   
+#  
 # Copyright (C) 2019 Jolly <https://totoro.site>
 #  
 # <https://github.com/net388488/NanoPi-R1S-Build-By-Actions>
@@ -8,7 +8,7 @@
 # Write by Jolly 2019/12/7
 # last update at 2019/12/19
 
-name: NanoPi-R1s H5 passwall
+name: NanoPi-R1s H5 open
 
 on:
   push:
@@ -71,14 +71,32 @@ jobs:
           cd friendlywrt
           cp -r ../lede/package/lean package/
           sed -i 's/https:\/\/git.openwrt.org\/project\/luci.git^039ef1f4deba725d3591b159bbc9569885d68131/https:\/\/github.com\/coolsnowwolf\/luci/' feeds.conf.default
-          sed -i 's/https:\/\/git.openwrt.org\/feed\/packages.git^00803ffc91e80b16e9c1603ff32106d42e255923/https:\/\/github.com\/coolsnowwolf\/packages/' feeds.conf.default
-          echo -e "\nsrc-git lienol https://github.com/Lienol/openwrt-package" >> feeds.conf.default	       
+          sed -i 's/https:\/\/git.openwrt.org\/feed\/packages.git^00803ffc91e80b16e9c1603ff32106d42e255923/https:\/\/github.com\/coolsnowwolf\/packages/' feeds.conf.default       
       
       - name: Custom Applications
         run: |
           cd friendlywrt-h5/friendlywrt/package
           git clone https://github.com/Baozisoftware/luci-app-koolproxy
-          
+
+      - name: openclash
+        run: |
+          cd friendlywrt-h5/friendlywrt
+          mkdir package/luci-app-openclash
+          cd package/luci-app-openclash
+          git init
+          git remote add -f origin https://github.com/vernesong/OpenClash.git
+          git config core.sparsecheckout true
+          echo "luci-app-openclash" >> .git/info/sparse-checkout
+          git pull origin master
+          git branch --set-upstream-to=origin/master master
+
+      - name: po2lmo
+        run: |
+          cd friendlywrt-h5/friendlywrt
+          pushd package/luci-app-openclash/luci-app-openclash/tools/po2lmo
+          make && sudo make install
+          popd
+
       - name: Update Target.mk
         run: |
           cd friendlywrt-h5/friendlywrt/include 
@@ -87,22 +105,7 @@ jobs:
       - name: Update Feeds
         run: |
           cd friendlywrt-h5/friendlywrt
-          ./scripts/feeds clean
           ./scripts/feeds update -a
-          rm -rf feeds/lienol/lienol/v2ray
-          rm -rf feeds/lienol/lienol/openssl1.1
-          rm -rf feeds/lienol/lienol/trojan
-          rm -rf feeds/lienol/lienol/ipt2socks
-          rm -rf feeds/lienol/lienol/shadowsocks-libev-new
-          rm -rf feeds/lienol/lienol/shadowsocksr-libev
-          rm -rf feeds/lienol/lienol/pdnsd-alt
-          rm -rf feeds/lienol/package/verysync
-          rm -rf feeds/lienol/lienol/luci-app-verysync
-          rm -rf package/lean/kcptun
-          rm -rf package/lean/luci-app-kodexplorer
-          rm -rf package/lean/luci-app-pppoe-relay
-          rm -rf package/lean/luci-app-pptp-server
-          rm -rf package/lean/luci-app-v2ray-server
           ./scripts/feeds install -a
           
       - name: Costom Configure File
