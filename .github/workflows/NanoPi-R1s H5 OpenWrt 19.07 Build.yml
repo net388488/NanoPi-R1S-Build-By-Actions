@@ -8,7 +8,7 @@
 # Write by Jolly 2019/12/7
 # last update at 2019/12/19
 
-name: NanoPi-R1s H5 OpenWrt 19.07 Build
+name: NanoPi-R1s H5 OpenWrt 19.07 zerotier
 
 on:
   # push:
@@ -95,7 +95,10 @@ jobs:
           rm -f ./.config*
           wget https://raw.githubusercontent.com/net388488/NanoPi-R1S-Build-By-Actions/master/new-r1s-h5-config
           cp new-r1s-h5-config .config
-      
+   
+      - name: SSH connection to Actions
+        uses: P3TERX/debugger-action@master
+
       - name: Download package
         if: always()
         run: |
@@ -121,5 +124,5 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@master
         with:
-          name: FriendlyWrt_NanoPi-R1S H5 v19.07
+          name: NanoPi-R1S zerotier H5 v19.07
           path: ./artifact/
